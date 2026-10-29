@@ -1,0 +1,158 @@
+<!DOCTYPE html>
+<html lang="pt-BR">
+<head>
+    <meta charset="UTF-8">
+    <meta name="viewport" content="width=device-width, initial-scale=1.0">
+    <title>DocesSS — Doces Artesanais Premium</title>
+    <meta name="description" content="DocesSS - Mousses artesanais e bombons gourmet. Mousses de abacaxi, limão, maracujá e bombons de Oreo. Faça seu pedido online!">
+    <meta name="keywords" content="doces, mousses, bombons, artesanal, gourmet, DocesSS, abacaxi, limão, maracujá, oreo">
+    <meta name="author" content="DocesSS">
+    <meta property="og:title" content="DocesSS — Doces Artesanais Premium">
+    <meta property="og:description" content="Mousses artesanais e bombons gourmet. Faça seu pedido online!">
+    <meta property="og:image" content="images/logo.jpg">
+    <meta property="og:type" content="website">
+    <link rel="preconnect" href="https://fonts.googleapis.com">
+    <link rel="preconnect" href="https://fonts.gstatic.com" crossorigin>
+    <link href="https://fonts.googleapis.com/css2?family=Playfair+Display:ital,wght@0,400;0,600;0,700;1,400&family=Inter:wght@300;400;500;600&family=Dancing+Script:wght@400;600;700&display=swap" rel="stylesheet">
+    <link rel="stylesheet" href="styles.css">
+</head>
+<body>
+
+    <!-- ============== PARTICLES BACKGROUND ============== -->
+    <div id="particles-bg" class="particles-bg"></div>
+
+    <!-- ============== PAGE 1: LANDING ============== -->
+    <section id="page-landing" class="page page--active">
+        <div class="landing">
+            <div class="landing__glow"></div>
+            <div class="landing__content" id="landing-content">
+                <img src="images/logo.jpg" alt="DocesSS Logo" class="landing__logo" id="landing-logo">
+                <p class="landing__tagline">Doces artesanais feitos com amor</p>
+                <button class="btn btn--primary btn--glow" id="btn-fazer-pedido" onclick="navigateTo('page-menu')">
+                    <span class="btn__icon">🍰</span>
+                    Fazer Pedido
+                </button>
+            </div>
+        </div>
+    </section>
+
+    <!-- ============== PAGE 2: MENU / CARDÁPIO ============== -->
+    <section id="page-menu" class="page">
+        <div class="menu-page">
+            <header class="menu-header">
+                <button class="btn-back" id="btn-back-landing" onclick="navigateTo('page-landing')">
+                    <svg width="20" height="20" viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="2"><path d="M19 12H5M12 19l-7-7 7-7"/></svg>
+                    Voltar
+                </button>
+                <h1 class="menu-header__title">Nosso Cardápio</h1>
+                <p class="menu-header__subtitle">Escolha suas delícias favoritas</p>
+            </header>
+
+            <!-- Category: Mousses -->
+            <div class="menu-category" id="category-mousses">
+                <div class="menu-category__header">
+                    <div class="menu-category__line"></div>
+                    <h2 class="menu-category__title">✨ Mousses Artesanais</h2>
+                    <div class="menu-category__line"></div>
+                </div>
+                <div class="menu-grid" id="grid-mousses">
+                    <!-- Products injected by JS -->
+                </div>
+            </div>
+
+            <!-- Category: Bombons -->
+            <div class="menu-category" id="category-bombons">
+                <div class="menu-category__header">
+                    <div class="menu-category__line"></div>
+                    <h2 class="menu-category__title">🍫 Bombons Gourmet</h2>
+                    <div class="menu-category__line"></div>
+                </div>
+                <div class="menu-grid" id="grid-bombons">
+                    <!-- Products injected by JS -->
+                </div>
+            </div>
+
+            <!-- Cart Summary -->
+            <div class="cart-summary" id="cart-summary" style="display:none;">
+                <div class="cart-summary__inner">
+                    <div class="cart-summary__info">
+                        <span class="cart-summary__count" id="cart-count">0</span>
+                        <span class="cart-summary__label">itens no pedido</span>
+                    </div>
+                    <div class="cart-summary__total">
+                        R$ <span id="cart-total">0,00</span>
+                    </div>
+                    <button class="btn btn--primary btn--small" id="btn-finalizar" onclick="navigateTo('page-checkout')">
+                        Finalizar Pedido
+                        <svg width="16" height="16" viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="2"><path d="M5 12h14M12 5l7 7-7 7"/></svg>
+                    </button>
+                </div>
+            </div>
+        </div>
+    </section>
+
+    <!-- ============== PAGE 3: CHECKOUT / FORMULÁRIO ============== -->
+    <section id="page-checkout" class="page">
+        <div class="checkout-page">
+            <header class="menu-header">
+                <button class="btn-back" id="btn-back-menu" onclick="navigateTo('page-menu')">
+                    <svg width="20" height="20" viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="2"><path d="M19 12H5M12 19l-7-7 7-7"/></svg>
+                    Voltar ao Cardápio
+                </button>
+                <h1 class="menu-header__title">Finalize seu Pedido</h1>
+                <p class="menu-header__subtitle">Preencha seus dados para confirmar</p>
+            </header>
+
+            <!-- Order Review -->
+            <div class="order-review" id="order-review">
+                <h3 class="order-review__title">📋 Resumo do Pedido</h3>
+                <div class="order-review__items" id="order-review-items">
+                    <!-- Injected by JS -->
+                </div>
+                <div class="order-review__total">
+                    <span>Total:</span>
+                    <span class="order-review__total-value">R$ <span id="review-total">0,00</span></span>
+                </div>
+            </div>
+
+            <!-- Form -->
+            <form class="checkout-form" id="checkout-form" onsubmit="submitOrder(event)">
+                <div class="form-group">
+                    <label for="input-name" class="form-label">Seu Nome</label>
+                    <input type="text" id="input-name" class="form-input" placeholder="Digite seu nome completo" required autocomplete="name">
+                </div>
+                <div class="form-group">
+                    <label for="input-phone" class="form-label">Telefone / WhatsApp</label>
+                    <input type="tel" id="input-phone" class="form-input" placeholder="(00) 00000-0000" required autocomplete="tel">
+                </div>
+                <div class="form-group">
+                    <label for="input-obs" class="form-label">Observações <span class="form-label__optional">(opcional)</span></label>
+                    <textarea id="input-obs" class="form-input form-input--textarea" placeholder="Alguma observação especial?" rows="3"></textarea>
+                </div>
+                <button type="submit" class="btn btn--primary btn--full btn--glow" id="btn-submit-order">
+                    <span class="btn__icon">📩</span>
+                    Enviar Pedido
+                </button>
+            </form>
+        </div>
+    </section>
+
+    <!-- ============== PAGE 4: CONFIRMATION ============== -->
+    <section id="page-confirmation" class="page">
+        <div class="confirmation-page">
+            <div class="confirmation__icon">✅</div>
+            <h1 class="confirmation__title">Pedido Enviado!</h1>
+            <p class="confirmation__text">Obrigado, <span id="confirm-name"></span>! Seu pedido foi recebido com sucesso. Entraremos em contato pelo número <span id="confirm-phone"></span> em breve.</p>
+            <div class="confirmation__order-id">
+                Pedido #<span id="confirm-order-id"></span>
+            </div>
+            <button class="btn btn--primary btn--glow" onclick="resetAndGoHome()">
+                <span class="btn__icon">🏠</span>
+                Voltar ao Início
+            </button>
+        </div>
+    </section>
+
+    <script src="app.js"></script>
+</body>
+</html>
