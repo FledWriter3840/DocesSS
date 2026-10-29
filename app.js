@@ -142,6 +142,16 @@ function removeFromCart(productId) {
     updateCartSummary();
 }
 
+function clearCart() {
+    // Reset all product actions before clearing
+    Object.keys(cart).forEach(productId => {
+        delete cart[productId];
+        updateProductAction(productId);
+    });
+    updateCartSummary();
+    showToast('Carrinho esvaziado! 🗑️');
+}
+
 function updateProductAction(productId) {
     const actionContainer = document.getElementById(`action-${productId}`);
     if (!actionContainer) return;
