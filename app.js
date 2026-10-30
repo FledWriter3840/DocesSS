@@ -1,103 +1,138 @@
 /* ============================================================
    DocesSS — Application Logic
-   Scalable SPA with product catalog, cart, and order system
+   Single Page Application with category filtering, instant search,
+   product details modal, cart management, and order submission.
    ============================================================ */
 
-// ==================== PRODUCT DATA (EASILY SCALABLE) ====================
-// To add new products, simply add an object to the appropriate category array.
-// The system automatically renders cards and handles cart logic.
+// ==================== PRODUCT CATALOG ====================
+const PRODUCTS = [
+    {
+        id: 'mousse-abacaxi',
+        name: 'Mousse de Abacaxi',
+        category: 'mousses',
+        description: 'Mousse cremoso com o frescor tropical do abacaxi em pedaços e raspas delicadas.',
+        price: 12.00,
+        image: 'images/mousse_abacaxi.jpg',
+        badge: 'Popular',
+        unit: 'unidade'
+    },
+    {
+        id: 'mousse-limao',
+        name: 'Mousse de Limão',
+        category: 'mousses',
+        description: 'Mousse suave e refrescante de limão siciliano com toque cítrico equilibrado.',
+        price: 12.00,
+        image: 'images/mousse_limao.jpg',
+        badge: null,
+        unit: 'unidade'
+    },
+    {
+        id: 'mousse-maracuja',
+        name: 'Mousse de Maracujá',
+        category: 'mousses',
+        description: 'Mousse aveludado de maracujá com calda artesanal da fruta e sementes crocantes.',
+        price: 12.00,
+        image: 'images/mousse_maracuja.jpg',
+        badge: 'Favorito',
+        unit: 'unidade'
+    },
+    {
+        id: 'bombom-oreo',
+        name: 'Bombom de Oreo',
+        category: 'bombons',
+        description: 'Bombom artesanal recheado com creme de Oreo triturado e coberto com chocolate nobre.',
+        price: 5.00,
+        image: 'images/bombom_oreo.jpg',
+        badge: 'Novo',
+        unit: 'unidade'
+    }
+];
 
-const PRODUCTS = {
-    mousses: [
-        {
-            id: 'mousse-abacaxi',
-            name: 'Mousse de Abacaxi',
-            description: 'Mousse cremoso com o frescor tropical do abacaxi, feito com ingredientes selecionados.',
-            price: 12.00,
-            image: 'images/mousse_abacaxi.jpg',
-            badge: 'Popular',
-            unit: 'unidade'
-        },
-        {
-            id: 'mousse-limao',
-            name: 'Mousse de Limão',
-            description: 'Mousse suave e refrescante de limão com toque cítrico irresistível.',
-            price: 12.00,
-            image: 'images/mousse_limao.jpg',
-            badge: null,
-            unit: 'unidade'
-        },
-        {
-            id: 'mousse-maracuja',
-            name: 'Mousse de Maracujá',
-            description: 'Mousse aveludado de maracujá com a intensidade da fruta da paixão.',
-            price: 12.00,
-            image: 'images/mousse_maracuja.jpg',
-            badge: 'Favorito',
-            unit: 'unidade'
-        }
-    ],
-    bombons: [
-        {
-            id: 'bombom-oreo',
-            name: 'Bombom de Oreo',
-            description: 'Bombom artesanal com recheio cremoso de Oreo coberto com chocolate belga.',
-            price: 5.00,
-            image: 'images/bombom_oreo.jpg',
-            badge: 'Novo',
-            unit: 'unidade'
-        }
-    ]
-    // ────────────────────────────────────────
-    // PARA ADICIONAR NOVA CATEGORIA:
-    // novaCategoria: [
-    //     { id: 'id-unico', name: 'Nome', description: '...', price: 10, image: 'images/xxx.jpg', badge: null, unit: 'unidade' }
-    // ]
-    // E adicione no HTML um novo bloco <div class="menu-category"> com id correspondente
-    // ────────────────────────────────────────
-};
-
-// ==================== EMAIL CONFIG ====================
-// Uses EmailJS for sending orders. Replace with your EmailJS credentials.
-const EMAIL_CONFIG = {
-    serviceId: 'YOUR_SERVICE_ID',      // Replace with your EmailJS Service ID
-    templateId: 'YOUR_TEMPLATE_ID',    // Replace with your EmailJS Template ID
-    publicKey: 'YOUR_PUBLIC_KEY',       // Replace with your EmailJS Public Key
-    recipientEmail: 'your@email.com'   // Replace with your email
+// ==================== EMAIL & WHATSAPP CONFIG ====================
+const CONFIG = {
+    whatsappNumber: '5511987654321', // Substitua pelo seu WhatsApp (com DDI e DDD)
+    recipientEmail: 'docesss@email.com',
+    serviceId: 'YOUR_SERVICE_ID',
+    templateId: 'YOUR_TEMPLATE_ID',
+    publicKey: 'YOUR_PUBLIC_KEY'
 };
 
 // ==================== STATE ====================
-const cart = {};  // { productId: quantity }
+const cart = {}; // { productId: quantity }
+let currentCategory = 'todos';
+let searchQuery = '';
 
 // ==================== INITIALIZATION ====================
 document.addEventListener('DOMContentLoaded', () => {
     renderProducts();
-    createParticles();
     setupPhoneMask();
+    updateCartDisplay();
 });
 
 // ==================== PRODUCT RENDERING ====================
-function renderProducts() {
-    Object.entries(PRODUCTS).forEach(([category, products]) => {
-        const grid = document.getElementById(`grid-${category}`);
-        if (!grid) return;
-
-        products.forEach((product, index) => {
-            const card = createProductCard(product, index);
-            grid.appendChild(card);
-        });
+function getFilteredProducts() {
+    return PRODUCTS.filter(product => {
+        const matchesCategory = currentCategory === 'todos' || product.category === currentCategory;
+        const matchesSearch = product.name.toLowerCase().includes(searchQuery.toLowerCase()) ||
+            product.description.toLowerCase().includes(searchQuery.toLowerCase());
+        return matchesCategory && matchesSearch;
     });
 }
 
-function createProductCard(product, index) {
+function renderProducts() {
+    const grid = document.getElementById('products-grid');
+    const emptyMsg = document.getElementById('products-empty');
+    if (!grid) return;
+
+    grid.innerHTML = '';
+    const filtered = getFilteredProducts();
+
+    if (filtered.length === 0) {
+        if (emptyMsg) emptyMsg.style.display = 'block';
+        return;
+    }
+
+    if (emptyMsg) emptyMsg.style.display = 'none';
+
+    filtered.forEach((product) => {
+        const card = createProductCard(product);
+        grid.appendChild(card);
+    });
+}
+
+function createProductCard(product) {
     const card = document.createElement('div');
     card.className = 'product-card';
-    card.style.animationDelay = `${index * 0.1}s`;
     card.id = `card-${product.id}`;
 
     const badgeHtml = product.badge
         ? `<span class="product-card__badge">${product.badge}</span>`
         : '';
+
+    const qty = cart[product.id] || 0;
+
+    let actionButtonsHtml = '';
+    if (qty === 0) {
+        actionButtonsHtml = `
+            <button class="btn btn--add" onclick="addToCart('${product.id}')">
+                Adicionar
+            </button>
+            <button class="btn btn--details" onclick="openModal('${product.id}')">
+                Ver Detalhes
+            </button>
+        `;
+    } else {
+        actionButtonsHtml = `
+            <div class="qty-row">
+                <button class="qty-btn" onclick="removeFromCart('${product.id}')" aria-label="Diminuir">−</button>
+                <span class="qty-value">${qty}</span>
+                <button class="qty-btn" onclick="addToCart('${product.id}')" aria-label="Aumentar">+</button>
+            </div>
+            <button class="btn btn--details" onclick="openModal('${product.id}')">
+                Ver Detalhes
+            </button>
+        `;
+    }
 
     card.innerHTML = `
         <div class="product-card__image-wrap">
@@ -106,17 +141,11 @@ function createProductCard(product, index) {
         </div>
         <div class="product-card__body">
             <h3 class="product-card__name">${product.name}</h3>
+            <div class="product-card__price-tag">R$ ${formatPrice(product.price)}/${product.unit === 'unidade' ? 'un' : product.unit}</div>
             <p class="product-card__desc">${product.description}</p>
-            <div class="product-card__footer">
-                <div class="product-card__price">
-                    R$ ${formatPrice(product.price)}
-                    <small>por ${product.unit}</small>
-                </div>
-                <div id="action-${product.id}">
-                    <button class="btn-add-cart" onclick="addToCart('${product.id}')">
-                        <span>+</span> Adicionar
-                    </button>
-                </div>
+            <div class="product-card__price-big">R$ ${formatPrice(product.price)}</div>
+            <div class="product-card__actions" id="actions-${product.id}">
+                ${actionButtonsHtml}
             </div>
         </div>
     `;
@@ -124,79 +153,122 @@ function createProductCard(product, index) {
     return card;
 }
 
+function updateProductCardAction(productId) {
+    const container = document.getElementById(`actions-${productId}`);
+    if (!container) return;
+
+    const qty = cart[productId] || 0;
+    if (qty === 0) {
+        container.innerHTML = `
+            <button class="btn btn--add" onclick="addToCart('${productId}')">
+                Adicionar
+            </button>
+            <button class="btn btn--details" onclick="openModal('${productId}')">
+                Ver Detalhes
+            </button>
+        `;
+    } else {
+        container.innerHTML = `
+            <div class="qty-row">
+                <button class="qty-btn" onclick="removeFromCart('${productId}')" aria-label="Diminuir">−</button>
+                <span class="qty-value">${qty}</span>
+                <button class="qty-btn" onclick="addToCart('${productId}')" aria-label="Aumentar">+</button>
+            </div>
+            <button class="btn btn--details" onclick="openModal('${productId}')">
+                Ver Detalhes
+            </button>
+        `;
+    }
+}
+
+// ==================== FILTER & SEARCH ====================
+function filterCategory(category, buttonEl) {
+    currentCategory = category;
+
+    document.querySelectorAll('.category-tab').forEach(tab => {
+        tab.classList.remove('category-tab--active');
+    });
+    if (buttonEl) {
+        buttonEl.classList.add('category-tab--active');
+    }
+
+    renderProducts();
+}
+
+function searchProducts(value) {
+    searchQuery = value.trim();
+    renderProducts();
+}
+
+// ==================== MODAL DE DETALHES ====================
+function openModal(productId) {
+    const product = findProduct(productId);
+    if (!product) return;
+
+    const overlay = document.getElementById('modal-overlay');
+    const img = document.getElementById('modal-image');
+    const name = document.getElementById('modal-name');
+    const desc = document.getElementById('modal-desc');
+    const price = document.getElementById('modal-price');
+    const addBtn = document.getElementById('modal-add-btn');
+
+    img.src = product.image;
+    img.alt = product.name;
+    name.textContent = product.name;
+    desc.textContent = product.description;
+    price.textContent = `R$ ${formatPrice(product.price)} por ${product.unit}`;
+
+    addBtn.onclick = () => {
+        addToCart(product.id);
+        closeModal();
+    };
+
+    overlay.classList.add('modal-overlay--open');
+}
+
+function closeModal() {
+    const overlay = document.getElementById('modal-overlay');
+    if (overlay) {
+        overlay.classList.remove('modal-overlay--open');
+    }
+}
+
 // ==================== CART MANAGEMENT ====================
 function addToCart(productId) {
     cart[productId] = (cart[productId] || 0) + 1;
-    updateProductAction(productId);
-    updateCartSummary();
-    showToast(`Adicionado ao pedido! 🎉`);
+    updateProductCardAction(productId);
+    updateCartDisplay();
+    showToast('Adicionado ao carrinho! 🍰');
 }
 
 function removeFromCart(productId) {
+    if (!cart[productId]) return;
+
     if (cart[productId] > 1) {
         cart[productId]--;
     } else {
         delete cart[productId];
     }
-    updateProductAction(productId);
-    updateCartSummary();
+
+    updateProductCardAction(productId);
+    updateCartDisplay();
 }
 
 function clearCart() {
-    // Reset all product actions before clearing
-    Object.keys(cart).forEach(productId => {
-        delete cart[productId];
-        updateProductAction(productId);
+    Object.keys(cart).forEach(id => {
+        delete cart[id];
+        updateProductCardAction(id);
     });
-    updateCartSummary();
+    updateCartDisplay();
     showToast('Carrinho esvaziado! 🗑️');
-}
-
-function updateProductAction(productId) {
-    const actionContainer = document.getElementById(`action-${productId}`);
-    if (!actionContainer) return;
-
-    const qty = cart[productId] || 0;
-
-    if (qty === 0) {
-        actionContainer.innerHTML = `
-            <button class="btn-add-cart" onclick="addToCart('${productId}')">
-                <span>+</span> Adicionar
-            </button>
-        `;
-    } else {
-        actionContainer.innerHTML = `
-            <div class="qty-control">
-                <button class="qty-control__btn" onclick="removeFromCart('${productId}')">−</button>
-                <span class="qty-control__value">${qty}</span>
-                <button class="qty-control__btn" onclick="addToCart('${productId}')">+</button>
-            </div>
-        `;
-    }
-}
-
-function updateCartSummary() {
-    const summaryEl = document.getElementById('cart-summary');
-    const countEl = document.getElementById('cart-count');
-    const totalEl = document.getElementById('cart-total');
-
-    const { totalItems, totalPrice } = getCartTotals();
-
-    if (totalItems === 0) {
-        summaryEl.style.display = 'none';
-    } else {
-        summaryEl.style.display = 'block';
-        countEl.textContent = totalItems;
-        totalEl.textContent = formatPrice(totalPrice);
-    }
 }
 
 function getCartTotals() {
     let totalItems = 0;
     let totalPrice = 0;
 
-    Object.entries(cart).forEach(([productId, qty]) => {
-        const product = findProduct(productId);
+    Object.entries(cart).forEach(([id, qty]) => {
+        const product = findProduct(id);
         if (product) {
             totalItems += qty;
             totalPrice += product.price * qty;
@@ -206,42 +278,60 @@ function getCartTotals() {
     return { totalItems, totalPrice };
 }
 
-function findProduct(productId) {
-    for (const category of Object.values(PRODUCTS)) {
-        const found = category.find(p => p.id === productId);
-        if (found) return found;
+function updateCartDisplay() {
+    const { totalItems, totalPrice } = getCartTotals();
+
+    // Top navbar count
+    const navCount = document.getElementById('navbar-cart-count');
+    if (navCount) navCount.textContent = totalItems;
+
+    // Bottom fixed cart bar
+    const cartBar = document.getElementById('cart-bar');
+    const barCount = document.getElementById('cart-bar-count');
+    const barTotal = document.getElementById('cart-bar-total');
+
+    if (cartBar) {
+        if (totalItems > 0) {
+            cartBar.style.display = 'block';
+            if (barCount) barCount.textContent = totalItems;
+            if (barTotal) barTotal.textContent = formatPrice(totalPrice);
+        } else {
+            cartBar.style.display = 'none';
+        }
     }
-    return null;
 }
 
-// ==================== ORDER REVIEW ====================
+function findProduct(id) {
+    return PRODUCTS.find(p => p.id === id);
+}
+
+// ==================== CHECKOUT REVIEW ====================
 function renderOrderReview() {
     const container = document.getElementById('order-review-items');
     const totalEl = document.getElementById('review-total');
+    if (!container || !totalEl) return;
+
     container.innerHTML = '';
+    const { totalPrice } = getCartTotals();
 
-    let total = 0;
-
-    Object.entries(cart).forEach(([productId, qty]) => {
-        const product = findProduct(productId);
+    Object.entries(cart).forEach(([id, qty]) => {
+        const product = findProduct(id);
         if (!product) return;
 
         const subtotal = product.price * qty;
-        total += subtotal;
-
-        const item = document.createElement('div');
-        item.className = 'order-review__item';
-        item.innerHTML = `
+        const row = document.createElement('div');
+        row.className = 'checkout__item';
+        row.innerHTML = `
             <div>
-                <span class="order-review__item-name">${product.name}</span>
-                <span class="order-review__item-qty"> × ${qty}</span>
+                <span class="checkout__item-name">${product.name}</span>
+                <span class="checkout__item-qty"> × ${qty}</span>
             </div>
-            <span class="order-review__item-price">R$ ${formatPrice(subtotal)}</span>
+            <span class="checkout__item-price">R$ ${formatPrice(subtotal)}</span>
         `;
-        container.appendChild(item);
+        container.appendChild(row);
     });
 
-    totalEl.textContent = formatPrice(total);
+    totalEl.textContent = formatPrice(totalPrice);
 }
 
 // ==================== ORDER SUBMISSION ====================
@@ -251,257 +341,186 @@ async function submitOrder(event) {
     const name = document.getElementById('input-name').value.trim();
     const phone = document.getElementById('input-phone').value.trim();
     const obs = document.getElementById('input-obs').value.trim();
-    const btn = document.getElementById('btn-submit-order');
+    const submitBtn = document.getElementById('btn-submit');
 
-    if (!name || !phone) {
-        showToast('Preencha todos os campos obrigatórios! ⚠️');
+    const { totalItems, totalPrice } = getCartTotals();
+
+    if (totalItems === 0) {
+        showToast('Seu carrinho está vazio! 🛒');
         return;
     }
 
-    // Build order details
+    if (!name || !phone) {
+        showToast('Preencha os campos obrigatórios! ⚠️');
+        return;
+    }
+
     const orderId = generateOrderId();
-    const { totalItems, totalPrice } = getCartTotals();
     const orderLines = [];
 
-    Object.entries(cart).forEach(([productId, qty]) => {
-        const product = findProduct(productId);
-        if (product) {
-            orderLines.push(`• ${product.name} × ${qty} = R$ ${formatPrice(product.price * qty)}`);
+    Object.entries(cart).forEach(([id, qty]) => {
+        const p = findProduct(id);
+        if (p) {
+            orderLines.push(`• ${p.name} × ${qty} = R$ ${formatPrice(p.price * qty)}`);
         }
     });
 
-    const orderText = orderLines.join('\n');
     const fullMessage = `
-═══════════════════════════
-   NOVO PEDIDO - DocesSS
-   Pedido #${orderId}
-═══════════════════════════
+*NOVO PEDIDO - DocesSS*
+*Pedido #${orderId}*
+-----------------------------
+*Itens:*
+${orderLines.join('\n')}
 
-📋 ITENS:
-${orderText}
-
-💰 TOTAL: R$ ${formatPrice(totalPrice)}
-📦 Quantidade: ${totalItems} itens
-
-👤 CLIENTE: ${name}
-📱 TELEFONE: ${phone}
-${obs ? `📝 OBS: ${obs}` : ''}
-
-📅 Data: ${new Date().toLocaleString('pt-BR')}
-═══════════════════════════
+*Total:* R$ ${formatPrice(totalPrice)} (${totalItems} itens)
+-----------------------------
+*Cliente:* ${name}
+*Telefone:* ${phone}
+${obs ? `*Observações:* ${obs}` : ''}
+*Data:* ${new Date().toLocaleString('pt-BR')}
     `.trim();
 
-    // Show loading state
-    btn.classList.add('btn--loading');
-    btn.disabled = true;
+    submitBtn.classList.add('btn--loading');
+    submitBtn.disabled = true;
 
     try {
-        // Try EmailJS if configured
-        if (EMAIL_CONFIG.publicKey !== 'YOUR_PUBLIC_KEY' && typeof emailjs !== 'undefined') {
-            await emailjs.send(EMAIL_CONFIG.serviceId, EMAIL_CONFIG.templateId, {
-                to_email: EMAIL_CONFIG.recipientEmail,
+        // Salva localmente
+        saveOrderLocally({
+            id: orderId,
+            name,
+            phone,
+            obs,
+            items: { ...cart },
+            total: totalPrice,
+            date: new Date().toISOString()
+        });
+
+        // Envia via EmailJS se configurado
+        if (CONFIG.publicKey !== 'YOUR_PUBLIC_KEY' && typeof emailjs !== 'undefined') {
+            await emailjs.send(CONFIG.serviceId, CONFIG.templateId, {
+                to_email: CONFIG.recipientEmail,
                 from_name: name,
                 phone: phone,
                 order_id: orderId,
-                order_details: orderText,
+                order_details: orderLines.join('\n'),
                 total: `R$ ${formatPrice(totalPrice)}`,
                 observations: obs || 'Nenhuma',
                 message: fullMessage
             });
         } else {
-            // Fallback: use mailto link and also log order
-            console.log('📧 PEDIDO RECEBIDO:');
-            console.log(fullMessage);
-
-            // Store order locally
-            saveOrderLocally({
-                id: orderId,
-                name,
-                phone,
-                obs,
-                items: { ...cart },
-                total: totalPrice,
-                date: new Date().toISOString(),
-                message: fullMessage
-            });
-
-            // Open mailto as fallback
+            // Fallback: abre cliente de email
             const subject = encodeURIComponent(`Novo Pedido #${orderId} - DocesSS`);
             const body = encodeURIComponent(fullMessage);
-            const mailtoLink = `mailto:${EMAIL_CONFIG.recipientEmail}?subject=${subject}&body=${body}`;
+            const mailto = `mailto:${CONFIG.recipientEmail}?subject=${subject}&body=${body}`;
 
-            // Create a hidden link and click it
-            const a = document.createElement('a');
-            a.href = mailtoLink;
-            a.style.display = 'none';
-            document.body.appendChild(a);
-            a.click();
-            document.body.removeChild(a);
+            const link = document.createElement('a');
+            link.href = mailto;
+            link.style.display = 'none';
+            document.body.appendChild(link);
+            link.click();
+            document.body.removeChild(link);
         }
 
-        // Show confirmation
+        // Exibe tela de confirmação
         document.getElementById('confirm-name').textContent = name;
         document.getElementById('confirm-phone').textContent = phone;
         document.getElementById('confirm-order-id').textContent = orderId;
 
         navigateTo('page-confirmation');
-        showToast('Pedido enviado com sucesso! ✅');
+        showToast('Pedido concluído com sucesso! 🎉');
 
-    } catch (error) {
-        console.error('Erro ao enviar pedido:', error);
-        showToast('Erro ao enviar. Tente novamente! ❌');
+    } catch (err) {
+        console.error(err);
+        showToast('Erro ao enviar pedido. Tente novamente! ❌');
     } finally {
-        btn.classList.remove('btn--loading');
-        btn.disabled = false;
+        submitBtn.classList.remove('btn--loading');
+        submitBtn.disabled = false;
     }
 }
 
-// ==================== LOCAL STORAGE ====================
+// ==================== STORAGE & NAVIGATION ====================
 function saveOrderLocally(order) {
     try {
         const orders = JSON.parse(localStorage.getItem('docesss_orders') || '[]');
         orders.push(order);
         localStorage.setItem('docesss_orders', JSON.stringify(orders));
     } catch (e) {
-        console.error('Erro ao salvar pedido localmente:', e);
+        console.error(e);
     }
 }
 
-function getLocalOrders() {
-    try {
-        return JSON.parse(localStorage.getItem('docesss_orders') || '[]');
-    } catch (e) {
-        return [];
-    }
-}
-
-// ==================== NAVIGATION ====================
 function navigateTo(pageId) {
-    // Scroll to top of the target page
-    const targetPage = document.getElementById(pageId);
-    if (targetPage) {
-        targetPage.scrollTop = 0;
-    }
+    const target = document.getElementById(pageId);
+    if (!target) return;
 
-    // If going to checkout, render order review
     if (pageId === 'page-checkout') {
         const { totalItems } = getCartTotals();
         if (totalItems === 0) {
-            showToast('Adicione itens ao pedido primeiro! 🛒');
+            showToast('Adicione itens antes de finalizar! 🛒');
             return;
         }
         renderOrderReview();
     }
 
-    // Animate pages
+    target.scrollTop = 0;
+
     document.querySelectorAll('.page').forEach(page => {
         page.classList.remove('page--active');
     });
 
     setTimeout(() => {
-        if (targetPage) {
-            targetPage.classList.add('page--active');
-        }
-    }, 50);
+        target.classList.add('page--active');
+    }, 40);
 }
 
 function resetAndGoHome() {
-    // Clear cart
-    Object.keys(cart).forEach(key => delete cart[key]);
-
-    // Reset all product actions
-    Object.values(PRODUCTS).flat().forEach(product => {
-        updateProductAction(product.id);
-    });
-
-    // Reset form
-    document.getElementById('checkout-form').reset();
-
-    // Update cart summary
-    updateCartSummary();
-
-    // Navigate home
+    clearCart();
+    const form = document.getElementById('checkout-form');
+    if (form) form.reset();
     navigateTo('page-landing');
 }
 
-// ==================== UTILITIES ====================
-function formatPrice(value) {
-    return value.toFixed(2).replace('.', ',');
+function scrollToSection(sectionId) {
+    const el = document.getElementById(sectionId);
+    if (el) {
+        el.scrollIntoView({ behavior: 'smooth' });
+    }
+}
+
+// ==================== HELPERS ====================
+function formatPrice(val) {
+    return Number(val).toFixed(2).replace('.', ',');
 }
 
 function generateOrderId() {
-    const now = new Date();
-    const datePart = now.toISOString().slice(2, 10).replace(/-/g, '');
-    const randomPart = Math.floor(Math.random() * 9000 + 1000);
-    return `${datePart}-${randomPart}`;
+    const d = new Date().toISOString().slice(2, 10).replace(/-/g, '');
+    const rand = Math.floor(Math.random() * 9000 + 1000);
+    return `${d}-${rand}`;
 }
 
-function showToast(message) {
-    // Remove existing toasts
+function showToast(msg) {
     document.querySelectorAll('.toast').forEach(t => t.remove());
-
     const toast = document.createElement('div');
     toast.className = 'toast';
-    toast.textContent = message;
+    toast.textContent = msg;
     document.body.appendChild(toast);
-
     setTimeout(() => toast.remove(), 3000);
 }
 
-// ==================== PHONE MASK ====================
 function setupPhoneMask() {
-    const phoneInput = document.getElementById('input-phone');
-    if (!phoneInput) return;
+    const phone = document.getElementById('input-phone');
+    if (!phone) return;
 
-    phoneInput.addEventListener('input', (e) => {
-        let value = e.target.value.replace(/\D/g, '');
-
-        if (value.length > 11) value = value.slice(0, 11);
-
-        if (value.length > 6) {
-            value = `(${value.slice(0, 2)}) ${value.slice(2, 7)}-${value.slice(7)}`;
-        } else if (value.length > 2) {
-            value = `(${value.slice(0, 2)}) ${value.slice(2)}`;
-        } else if (value.length > 0) {
-            value = `(${value}`;
+    phone.addEventListener('input', (e) => {
+        let v = e.target.value.replace(/\D/g, '');
+        if (v.length > 11) v = v.slice(0, 11);
+        if (v.length > 6) {
+            v = `(${v.slice(0, 2)}) ${v.slice(2, 7)}-${v.slice(7)}`;
+        } else if (v.length > 2) {
+            v = `(${v.slice(0, 2)}) ${v.slice(2)}`;
+        } else if (v.length > 0) {
+            v = `(${v}`;
         }
-
-        e.target.value = value;
+        e.target.value = v;
     });
-}
-
-// ==================== PARTICLES ====================
-function createParticles() {
-    const container = document.getElementById('particles-bg');
-    if (!container) return;
-
-    const colors = [
-        'rgba(248, 59, 108, 0.3)',
-        'rgba(212, 160, 18, 0.25)',
-        'rgba(255, 160, 184, 0.2)',
-        'rgba(249, 197, 58, 0.2)',
-    ];
-
-    for (let i = 0; i < 25; i++) {
-        const particle = document.createElement('div');
-        particle.className = 'particle';
-
-        const size = Math.random() * 6 + 2;
-        const color = colors[Math.floor(Math.random() * colors.length)];
-        const duration = Math.random() * 15 + 10;
-        const delay = Math.random() * 15;
-        const left = Math.random() * 100;
-
-        particle.style.cssText = `
-            width: ${size}px;
-            height: ${size}px;
-            background: ${color};
-            left: ${left}%;
-            animation-duration: ${duration}s;
-            animation-delay: ${delay}s;
-            box-shadow: 0 0 ${size * 2}px ${color};
-        `;
-
-        container.appendChild(particle);
-    }
 }
