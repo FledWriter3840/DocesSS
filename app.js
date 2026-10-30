@@ -62,8 +62,8 @@ const PRODUCTS = [
 
 // ==================== EMAIL & WHATSAPP CONFIG ====================
 const CONFIG = {
-    whatsappNumber: '5511987654321', // Substitua pelo seu WhatsApp (com DDI e DDD)
-    recipientEmail: 'docesss@email.com',
+    whatsappNumber: '551195530849', // Substitua pelo seu WhatsApp (com DDI e DDD)
+    recipientEmail: 'desouzasoaresmatheus@gmail.com',
     serviceId: 'YOUR_SERVICE_ID',
     templateId: 'YOUR_TEMPLATE_ID',
     publicKey: 'YOUR_PUBLIC_KEY'
