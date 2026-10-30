@@ -11,7 +11,11 @@ const PRODUCTS = [
         name: 'Mousse de Abacaxi',
         category: 'mousses',
         description: 'Mousse cremoso com o frescor tropical do abacaxi em pedaços e raspas delicadas.',
-        price: 12.00,
+        price: 5.00,
+        sizes: [
+            { volume: 140, price: 5.00 },
+            { volume: 250, price: 10.00 }
+        ],
         image: 'images/mousse_abacaxi.jpg',
         badge: 'Popular',
         unit: 'unidade'
@@ -21,7 +25,11 @@ const PRODUCTS = [
         name: 'Mousse de Limão',
         category: 'mousses',
         description: 'Mousse suave e refrescante de limão siciliano com toque cítrico equilibrado.',
-        price: 12.00,
+        price: 5.00,
+        sizes: [
+            { volume: 140, price: 5.00 },
+            { volume: 250, price: 10.00 }
+        ],
         image: 'images/mousse_limao.jpg',
         badge: null,
         unit: 'unidade'
@@ -31,7 +39,11 @@ const PRODUCTS = [
         name: 'Mousse de Maracujá',
         category: 'mousses',
         description: 'Mousse aveludado de maracujá com calda artesanal da fruta e sementes crocantes.',
-        price: 12.00,
+        price: 5.00,
+        sizes: [
+            { volume: 140, price: 5.00 },
+            { volume: 250, price: 10.00 }
+        ],
         image: 'images/mousse_maracuja.jpg',
         badge: 'Favorito',
         unit: 'unidade'
@@ -58,7 +70,8 @@ const CONFIG = {
 };
 
 // ==================== STATE ====================
-const cart = {}; // { productId: quantity }
+const cart = {}; // { product key: quantity }
+const selectedMousseSizes = {};
 let currentCategory = 'todos';
 let searchQuery = '';
 
@@ -109,7 +122,9 @@ function createProductCard(product) {
         ? `<span class="product-card__badge">${product.badge}</span>`
         : '';
 
-    const qty = cart[product.id] || 0;
+    const mousseSize = getSelectedMousseSize(product.id);
+    const price = getProductPrice(product, mousseSize);
+    const qty = cart[getCartItemKey(product.id, mousseSize)] || 0;
 
     let actionButtonsHtml = '';
     if (qty === 0) {
@@ -141,9 +156,15 @@ function createProductCard(product) {
         </div>
         <div class="product-card__body">
             <h3 class="product-card__name">${product.name}</h3>
-            <div class="product-card__price-tag">R$ ${formatPrice(product.price)}/${product.unit === 'unidade' ? 'un' : product.unit}</div>
+            ${product.sizes ? `
+                <label class="product-card__size-label" for="size-${product.id}">Tamanho do pote</label>
+                <select class="product-card__size-select" id="size-${product.id}" onchange="selectMousseSize('${product.id}', this.value)">
+                    ${product.sizes.map(size => `<option value="${size.volume}" ${size.volume === Number(mousseSize) ? 'selected' : ''}>Pote ${size.volume} ml</option>`).join('')}
+                </select>
+            ` : ''}
+            <div class="product-card__price-tag" id="price-tag-${product.id}">${product.sizes ? `R$ ${formatPrice(price)} / pote` : `R$ ${formatPrice(product.price)}/${product.unit === 'unidade' ? 'un' : product.unit}`}</div>
             <p class="product-card__desc">${product.description}</p>
-            <div class="product-card__price-big">R$ ${formatPrice(product.price)}</div>
+            <div class="product-card__price-big" id="price-${product.id}">R$ ${formatPrice(price)}</div>
             <div class="product-card__actions" id="actions-${product.id}">
                 ${actionButtonsHtml}
             </div>
@@ -157,7 +178,10 @@ function updateProductCardAction(productId) {
     const container = document.getElementById(`actions-${productId}`);
     if (!container) return;
 
-    const qty = cart[productId] || 0;
+    const product = findProduct(productId);
+    if (!product) return;
+
+    const qty = cart[getCartItemKey(productId)] || 0;
     if (qty === 0) {
         container.innerHTML = `
             <button class="btn btn--add" onclick="addToCart('${productId}')">
@@ -179,6 +203,35 @@ function updateProductCardAction(productId) {
             </button>
         `;
     }
+}
+
+function getSelectedMousseSize(productId) {
+    return selectedMousseSizes[productId] || '140';
+}
+
+function getCartItemKey(productId, size = getSelectedMousseSize(productId)) {
+    const product = findProduct(productId);
+    return product && product.sizes ? `${productId}:${size}` : productId;
+}
+
+function getProductPrice(product, size) {
+    if (!product.sizes) return product.price;
+    const selectedSize = product.sizes.find(option => option.volume === Number(size));
+    return selectedSize ? selectedSize.price : product.sizes[0].price;
+}
+
+function selectMousseSize(productId, size) {
+    selectedMousseSizes[productId] = size;
+
+    const product = findProduct(productId);
+    if (!product || !product.sizes) return;
+
+    const price = getProductPrice(product, size);
+    const priceTag = document.getElementById(`price-tag-${productId}`);
+    const priceElement = document.getElementById(`price-${productId}`);
+    if (priceTag) priceTag.textContent = `R$ ${formatPrice(price)} / pote`;
+    if (priceElement) priceElement.textContent = `R$ ${formatPrice(price)}`;
+    updateProductCardAction(productId);
 }
 
 // ==================== FILTER & SEARCH ====================
@@ -216,7 +269,11 @@ function openModal(productId) {
     img.alt = product.name;
     name.textContent = product.name;
     desc.textContent = product.description;
-    price.textContent = `R$ ${formatPrice(product.price)} por ${product.unit}`;
+    const size = getSelectedMousseSize(product.id);
+    const productPrice = getProductPrice(product, size);
+    price.textContent = product.sizes
+        ? `Pote ${size} ml — R$ ${formatPrice(productPrice)}`
+        : `R$ ${formatPrice(productPrice)} por ${product.unit}`;
 
     addBtn.onclick = () => {
         addToCart(product.id);
@@ -235,19 +292,21 @@ function closeModal() {
 
 // ==================== CART MANAGEMENT ====================
 function addToCart(productId) {
-    cart[productId] = (cart[productId] || 0) + 1;
+    const cartItemKey = getCartItemKey(productId);
+    cart[cartItemKey] = (cart[cartItemKey] || 0) + 1;
     updateProductCardAction(productId);
     updateCartDisplay();
     showToast('Adicionado ao carrinho! 🍰');
 }
 
 function removeFromCart(productId) {
-    if (!cart[productId]) return;
+    const cartItemKey = getCartItemKey(productId);
+    if (!cart[cartItemKey]) return;
 
-    if (cart[productId] > 1) {
-        cart[productId]--;
+    if (cart[cartItemKey] > 1) {
+        cart[cartItemKey]--;
     } else {
-        delete cart[productId];
+        delete cart[cartItemKey];
     }
 
     updateProductCardAction(productId);
@@ -257,8 +316,8 @@ function removeFromCart(productId) {
 function clearCart() {
     Object.keys(cart).forEach(id => {
         delete cart[id];
-        updateProductCardAction(id);
     });
+    PRODUCTS.forEach(product => updateProductCardAction(product.id));
     updateCartDisplay();
     showToast('Carrinho esvaziado! 🗑️');
 }
@@ -267,11 +326,12 @@ function getCartTotals() {
     let totalItems = 0;
     let totalPrice = 0;
 
-    Object.entries(cart).forEach(([id, qty]) => {
+    Object.entries(cart).forEach(([cartItemKey, qty]) => {
+        const [id, size] = cartItemKey.split(':');
         const product = findProduct(id);
         if (product) {
             totalItems += qty;
-            totalPrice += product.price * qty;
+            totalPrice += getProductPrice(product, size) * qty;
         }
     });
 
@@ -314,16 +374,20 @@ function renderOrderReview() {
     container.innerHTML = '';
     const { totalPrice } = getCartTotals();
 
-    Object.entries(cart).forEach(([id, qty]) => {
+    Object.entries(cart).forEach(([cartItemKey, qty]) => {
+        const [id, size] = cartItemKey.split(':');
         const product = findProduct(id);
         if (!product) return;
 
-        const subtotal = product.price * qty;
+        const itemPrice = getProductPrice(product, size);
+        const subtotal = itemPrice * qty;
+        const itemName = product.sizes ? `${product.name} (pote ${size} ml)` : product.name;
         const row = document.createElement('div');
         row.className = 'checkout__item';
         row.innerHTML = `
             <div>
-                <span class="checkout__item-name">${product.name}</span>
+                <span class="checkout__item-name">${itemName}</span>
+                <span class="checkout__item-qty"> — R$ ${formatPrice(itemPrice)}</span>
                 <span class="checkout__item-qty"> × ${qty}</span>
             </div>
             <span class="checkout__item-price">R$ ${formatPrice(subtotal)}</span>
@@ -358,10 +422,13 @@ async function submitOrder(event) {
     const orderId = generateOrderId();
     const orderLines = [];
 
-    Object.entries(cart).forEach(([id, qty]) => {
+    Object.entries(cart).forEach(([cartItemKey, qty]) => {
+        const [id, size] = cartItemKey.split(':');
         const p = findProduct(id);
         if (p) {
-            orderLines.push(`• ${p.name} × ${qty} = R$ ${formatPrice(p.price * qty)}`);
+            const itemPrice = getProductPrice(p, size);
+            const itemName = p.sizes ? `${p.name} (pote ${size} ml)` : p.name;
+            orderLines.push(`• ${itemName} × ${qty} = R$ ${formatPrice(itemPrice * qty)}`);
         }
     });
 

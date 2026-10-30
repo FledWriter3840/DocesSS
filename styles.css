@@ -546,6 +546,31 @@ img {
     margin-bottom: 6px;
 }
 
+.product-card__size-label {
+    font-size: 0.75rem;
+    color: var(--gray-500);
+    font-weight: 600;
+    margin-bottom: 4px;
+}
+
+.product-card__size-select {
+    width: 100%;
+    padding: 7px 10px;
+    margin-bottom: 6px;
+    border: 1px solid var(--gray-200);
+    border-radius: var(--radius-sm);
+    background: var(--white);
+    color: var(--gray-800);
+    font: inherit;
+    font-size: 0.82rem;
+    cursor: pointer;
+}
+
+.product-card__size-select:focus {
+    outline: 2px solid var(--green-300);
+    outline-offset: 1px;
+}
+
 .product-card__desc {
     font-size: 0.78rem;
     color: var(--gray-500);
