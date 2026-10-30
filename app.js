@@ -351,7 +351,10 @@ function updateCartDisplay() {
     const barTotal = document.getElementById('cart-bar-total');
 
     if (cartBar) {
-        if (totalItems > 0) {
+        const menuPage = document.getElementById('page-menu');
+        const isMenuActive = menuPage && menuPage.classList.contains('page--active');
+
+        if (totalItems > 0 && isMenuActive) {
             cartBar.style.display = 'block';
             if (barCount) barCount.textContent = totalItems;
             if (barTotal) barTotal.textContent = formatPrice(totalPrice);
@@ -537,6 +540,7 @@ function navigateTo(pageId) {
 
     setTimeout(() => {
         target.classList.add('page--active');
+        updateCartDisplay();
     }, 40);
 }
 

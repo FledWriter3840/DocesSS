@@ -683,23 +683,26 @@ img {
 /* ==================== CART BAR (fixed bottom) ==================== */
 .cart-bar {
     position: fixed;
-    bottom: 0;
-    left: 0;
-    right: 0;
+    bottom: 92px;
+    left: 50%;
+    width: calc(100% - 40px);
+    max-width: 960px;
     z-index: 200;
     background: var(--white);
-    border-top: 1px solid var(--gray-200);
-    box-shadow: 0 -4px 20px rgba(0, 0, 0, 0.08);
+    border: 1px solid var(--gray-200);
+    border-radius: var(--radius-lg);
+    box-shadow: 0 4px 20px rgba(0, 0, 0, 0.12);
+    transform: translateX(-50%);
     animation: slideUp 0.35s ease;
 }
 
 @keyframes slideUp {
     from {
-        transform: translateY(100%);
+        transform: translate(-50%, 100%);
     }
 
     to {
-        transform: translateY(0);
+        transform: translate(-50%, 0);
     }
 }
 
@@ -1219,6 +1222,29 @@ img {
 }
 
 @media (max-width: 480px) {
+    .cart-bar {
+        bottom: 88px;
+        width: calc(100% - 24px);
+    }
+
+    .cart-bar__inner {
+        padding: 10px 12px;
+    }
+
+    .cart-bar__left,
+    .cart-bar__right {
+        width: 100%;
+        justify-content: space-between;
+    }
+
+    .cart-bar__right {
+        gap: 8px;
+    }
+
+    .cart-bar__total {
+        font-size: 1rem;
+    }
+
     .products-grid {
         grid-template-columns: 1fr;
         gap: 14px;
