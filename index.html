@@ -154,8 +154,9 @@
     <section id="page-confirmation" class="page">
         <div class="confirmation">
             <div class="confirmation__icon">✅</div>
-            <h1 class="confirmation__title">Pedido Enviado!</h1>
-            <p class="confirmation__text">Obrigado, <strong id="confirm-name"></strong>! Seu pedido foi recebido com sucesso.</p>
+            <h1 class="confirmation__title" id="confirm-title">Pedido preparado</h1>
+            <p class="confirmation__text">Obrigado, <strong id="confirm-name"></strong>!</p>
+            <p class="confirmation__text" id="confirm-status"></p>
             <p class="confirmation__text">Entraremos em contato pelo número <strong id="confirm-phone"></strong> em breve.</p>
             <div class="confirmation__id">Pedido #<span id="confirm-order-id"></span></div>
             <button class="btn btn--primary btn--lg" onclick="resetAndGoHome()">
@@ -206,6 +207,7 @@
         </svg>
     </a>
 
+    <script src="https://cdn.jsdelivr.net/npm/@emailjs/browser@4/dist/email.min.js"></script>
     <script src="app.js"></script>
 </body>
 </html>

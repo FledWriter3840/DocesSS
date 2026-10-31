@@ -61,9 +61,9 @@ const PRODUCTS = [
 ];
 
 // ==================== EMAIL & WHATSAPP CONFIG ====================
+// Preencha os IDs do EmailJS; configure o destinatário fixo no modelo do serviço.
 const CONFIG = {
     whatsappNumber: '551195530849', // Substitua pelo seu WhatsApp (com DDI e DDD)
-    recipientEmail: 'desouzasoaresmatheus@gmail.com',
     serviceId: 'YOUR_SERVICE_ID',
     templateId: 'YOUR_TEMPLATE_ID',
     publicKey: 'YOUR_PUBLIC_KEY'
@@ -405,6 +405,20 @@ function renderOrderReview() {
 async function submitOrder(event) {
     event.preventDefault();
 
+    if (typeof emailjs === 'undefined') {
+        showToast('Não foi possível carregar o serviço de e-mail. Verifique sua conexão e tente novamente.');
+        return;
+    }
+
+    if (
+        CONFIG.serviceId === 'YOUR_SERVICE_ID' ||
+        CONFIG.templateId === 'YOUR_TEMPLATE_ID' ||
+        CONFIG.publicKey === 'YOUR_PUBLIC_KEY'
+    ) {
+        showToast('Configure o EmailJS para habilitar o envio automático.');
+        return;
+    }
+
     const name = document.getElementById('input-name').value.trim();
     const phone = document.getElementById('input-phone').value.trim();
     const obs = document.getElementById('input-obs').value.trim();
@@ -454,7 +468,18 @@ ${obs ? `*Observações:* ${obs}` : ''}
     submitBtn.disabled = true;
 
     try {
-        // Salva localmente
+        await emailjs.send(CONFIG.serviceId, CONFIG.templateId, {
+            from_name: name,
+            phone,
+            order_id: orderId,
+            order_details: orderLines.join('\n'),
+            total: `R$ ${formatPrice(totalPrice)}`,
+            observations: obs || 'Nenhuma',
+            message: fullMessage
+        }, {
+            publicKey: CONFIG.publicKey
+        });
+
         saveOrderLocally({
             id: orderId,
             name,
@@ -465,43 +490,19 @@ ${obs ? `*Observações:* ${obs}` : ''}
             date: new Date().toISOString()
         });
 
-        // Envia via EmailJS se configurado
-        if (CONFIG.publicKey !== 'YOUR_PUBLIC_KEY' && typeof emailjs !== 'undefined') {
-            await emailjs.send(CONFIG.serviceId, CONFIG.templateId, {
-                to_email: CONFIG.recipientEmail,
-                from_name: name,
-                phone: phone,
-                order_id: orderId,
-                order_details: orderLines.join('\n'),
-                total: `R$ ${formatPrice(totalPrice)}`,
-                observations: obs || 'Nenhuma',
-                message: fullMessage
-            });
-        } else {
-            // Fallback: abre cliente de email
-            const subject = encodeURIComponent(`Novo Pedido #${orderId} - DocesSS`);
-            const body = encodeURIComponent(fullMessage);
-            const mailto = `mailto:${CONFIG.recipientEmail}?subject=${subject}&body=${body}`;
-
-            const link = document.createElement('a');
-            link.href = mailto;
-            link.style.display = 'none';
-            document.body.appendChild(link);
-            link.click();
-            document.body.removeChild(link);
-        }
-
         // Exibe tela de confirmação
         document.getElementById('confirm-name').textContent = name;
         document.getElementById('confirm-phone').textContent = phone;
         document.getElementById('confirm-order-id').textContent = orderId;
+        document.getElementById('confirm-title').textContent = 'Pedido enviado!';
+        document.getElementById('confirm-status').textContent = 'O serviço de e-mail aceitou o pedido. Confira sua caixa de entrada e a pasta de spam.';
 
         navigateTo('page-confirmation');
-        showToast('Pedido concluído com sucesso! 🎉');
+        showToast('Pedido enviado por e-mail! 🎉');
 
     } catch (err) {
         console.error(err);
-        showToast('Erro ao enviar pedido. Tente novamente! ❌');
+        showToast('Não foi possível enviar o pedido. Confira a configuração do EmailJS e tente novamente.');
     } finally {
         submitBtn.classList.remove('btn--loading');
         submitBtn.disabled = false;
