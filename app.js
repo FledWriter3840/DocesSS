@@ -63,6 +63,20 @@ const PRODUCTS = [
         unit: 'pote'
     },
     {
+        id: 'mousse-laranja',
+        name: 'Mousse de Laranja',
+        category: 'mousses',
+        description: 'Mousse cremoso no pote com o sabor cítrico e refrescante da laranja.',
+        price: 5.00,
+        sizes: [
+            { volume: 140, price: 5.00 },
+            { volume: 250, price: 10.00 }
+        ],
+        image: 'images/mousse_laranja_pote.jpg',
+        badge: null,
+        unit: 'pote'
+    },
+    {
         id: 'bombom-oreo',
         name: 'Bombom de Oreo',
         category: 'bombons',
