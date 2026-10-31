@@ -64,9 +64,9 @@ const PRODUCTS = [
 // Preencha os IDs do EmailJS; configure o destinatário fixo no modelo do serviço.
 const CONFIG = {
     whatsappNumber: '551195530849', // Substitua pelo seu WhatsApp (com DDI e DDD)
-    serviceId: 'YOUR_SERVICE_ID',
-    templateId: 'YOUR_TEMPLATE_ID',
-    publicKey: 'YOUR_PUBLIC_KEY'
+    serviceId: 'service_iyqckia',
+    templateId: 'template_8f8fvsp',
+    publicKey: 'JMwKfGCrghli2rQ_b'
 };
 
 // ==================== STATE ====================
