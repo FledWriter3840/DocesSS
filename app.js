@@ -10,7 +10,7 @@ const PRODUCTS = [
         id: 'mousse-abacaxi',
         name: 'Mousse de Abacaxi',
         category: 'mousses',
-        description: 'Mousse cremoso com o frescor tropical do abacaxi em pedaços e raspas delicadas.',
+        description: 'Mousse cremoso no pote com o frescor tropical do abacaxi em pedaços e raspas delicadas.',
         price: 5.00,
         sizes: [
             { volume: 140, price: 5.00 },
@@ -18,13 +18,13 @@ const PRODUCTS = [
         ],
         image: 'images/mousse_abacaxi.jpg',
         badge: 'Popular',
-        unit: 'unidade'
+        unit: 'pote'
     },
     {
         id: 'mousse-limao',
         name: 'Mousse de Limão',
         category: 'mousses',
-        description: 'Mousse suave e refrescante de limão siciliano com toque cítrico equilibrado.',
+        description: 'Mousse suave e refrescante no pote com limão siciliano e toque cítrico equilibrado.',
         price: 5.00,
         sizes: [
             { volume: 140, price: 5.00 },
@@ -32,13 +32,13 @@ const PRODUCTS = [
         ],
         image: 'images/mousse_limao.jpg',
         badge: null,
-        unit: 'unidade'
+        unit: 'pote'
     },
     {
         id: 'mousse-maracuja',
         name: 'Mousse de Maracujá',
         category: 'mousses',
-        description: 'Mousse aveludado de maracujá com calda artesanal da fruta e sementes crocantes.',
+        description: 'Mousse aveludado no pote com calda artesanal de maracujá e sementes crocantes.',
         price: 5.00,
         sizes: [
             { volume: 140, price: 5.00 },
@@ -46,13 +46,13 @@ const PRODUCTS = [
         ],
         image: 'images/mousse_maracuja.jpg',
         badge: 'Favorito',
-        unit: 'unidade'
+        unit: 'pote'
     },
     {
         id: 'bombom-oreo',
         name: 'Bombom de Oreo',
         category: 'bombons',
-        description: 'Bombom artesanal recheado com creme de Oreo triturado e coberto com chocolate nobre.',
+        description: 'Bombom artesanal clássico com casca lisa de chocolate nobre e recheio cremoso de Oreo.',
         price: 5.00,
         image: 'images/bombom_oreo.jpg',
         badge: 'Novo',
@@ -450,7 +450,7 @@ async function submitOrder(event) {
     });
 
     const fullMessage = `
-*NOVO PEDIDO - DocesSS*
+*NOVO PEDIDO - Doces S&S*
 *Pedido #${orderId}*
 -----------------------------
 *Itens:*
