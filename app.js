@@ -10,7 +10,7 @@ const PRODUCTS = [
         id: 'mousse-abacaxi',
         name: 'Mousse de Abacaxi',
         category: 'mousses',
-        description: 'Mousse cremoso no pote com o frescor tropical do abacaxi em pedaços e raspas delicadas.',
+        description: 'Mousse cremoso no pote com o sabor de abacaxi.',
         price: 5.00,
         sizes: [
             { volume: 140, price: 5.00 },
@@ -24,7 +24,7 @@ const PRODUCTS = [
         id: 'mousse-limao',
         name: 'Mousse de Limão',
         category: 'mousses',
-        description: 'Mousse suave e refrescante no pote com limão siciliano e toque cítrico equilibrado.',
+        description: 'Mousse cremoso no pote com o sabor de limão.',
         price: 5.00,
         sizes: [
             { volume: 140, price: 5.00 },
@@ -38,7 +38,7 @@ const PRODUCTS = [
         id: 'mousse-maracuja',
         name: 'Mousse de Maracujá',
         category: 'mousses',
-        description: 'Mousse aveludado no pote com calda artesanal de maracujá e sementes crocantes.',
+        description: 'Mousse cremoso no pote com o sabor de maracujá.',
         price: 5.00,
         sizes: [
             { volume: 140, price: 5.00 },
@@ -52,7 +52,7 @@ const PRODUCTS = [
         id: 'mousse-uva',
         name: 'Mousse de Uva',
         category: 'mousses',
-        description: 'Mousse cremoso no pote com o sabor delicado e refrescante da uva.',
+        description: 'Mousse cremoso no pote com o sabor de uva.',
         price: 5.00,
         sizes: [
             { volume: 140, price: 5.00 },
@@ -66,7 +66,7 @@ const PRODUCTS = [
         id: 'mousse-laranja',
         name: 'Mousse de Laranja',
         category: 'mousses',
-        description: 'Mousse cremoso no pote com o sabor cítrico e refrescante da laranja.',
+        description: 'Mousse cremoso no pote com o sabor de laranja.',
         price: 5.00,
         sizes: [
             { volume: 140, price: 5.00 },
@@ -80,7 +80,7 @@ const PRODUCTS = [
         id: 'bombom-oreo',
         name: 'Bombom de Oreo',
         category: 'bombons',
-        description: 'Bombom artesanal clássico com casca lisa de chocolate nobre e recheio cremoso de Oreo.',
+        description: 'Bombom artesanal clássico com casca lisa de chocolate e recheio cremoso de Oreo.',
         price: 5.00,
         image: 'images/bombom_oreo.jpg',
         badge: 'Novo',
@@ -523,7 +523,7 @@ ${obs ? `*Observações:* ${obs}` : ''}
         document.getElementById('confirm-phone').textContent = phone;
         document.getElementById('confirm-order-id').textContent = orderId;
         document.getElementById('confirm-title').textContent = 'Pedido enviado!';
-        document.getElementById('confirm-status').textContent = 'O serviço de e-mail aceitou o pedido. Confira sua caixa de entrada e a pasta de spam.';
+        document.getElementById('confirm-status').textContent = 'O serviço de e-mail aceitou o pedido. Quaisquer dúvidas mandar mensagem via Whatsapp ou email.';
 
         navigateTo('page-confirmation');
         showToast('Pedido enviado por e-mail! 🎉');
