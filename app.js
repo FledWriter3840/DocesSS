@@ -16,7 +16,7 @@ const PRODUCTS = [
             { volume: 140, price: 5.00 },
             { volume: 250, price: 10.00 }
         ],
-        image: 'images/mousse_abacaxi.jpg',
+        image: 'images/mousse_abacaxi_pote.jpg',
         badge: 'Popular',
         unit: 'pote'
     },
@@ -30,7 +30,7 @@ const PRODUCTS = [
             { volume: 140, price: 5.00 },
             { volume: 250, price: 10.00 }
         ],
-        image: 'images/mousse_limao.jpg',
+        image: 'images/mousse_limao_pote.jpg',
         badge: null,
         unit: 'pote'
     },
@@ -44,8 +44,22 @@ const PRODUCTS = [
             { volume: 140, price: 5.00 },
             { volume: 250, price: 10.00 }
         ],
-        image: 'images/mousse_maracuja.jpg',
+        image: 'images/mousse_maracuja_pote.jpg',
         badge: 'Favorito',
+        unit: 'pote'
+    },
+    {
+        id: 'mousse-uva',
+        name: 'Mousse de Uva',
+        category: 'mousses',
+        description: 'Mousse cremoso no pote com o sabor delicado e refrescante da uva.',
+        price: 5.00,
+        sizes: [
+            { volume: 140, price: 5.00 },
+            { volume: 250, price: 10.00 }
+        ],
+        image: 'images/mousse_uva_pote.jpg',
+        badge: null,
         unit: 'pote'
     },
     {
